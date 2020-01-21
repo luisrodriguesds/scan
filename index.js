@@ -1,5 +1,5 @@
-// const paht   = '/run/user/1000/gvfs/smb-share:server=10.2.192.201,share=medidas%20drx%20panalytical/2019/';
-// const paht   = '/var/www/scan/';
+// const path   = '/run/user/1000/gvfs/smb-share:server=10.2.192.201,share=medidas%20drx%20panalytical/2019/';
+// const path   = '/var/www/scan/2019/';
 const path      = 'C:\\wamp64\\www\\scan\\medidas\\';
 
 // Import the module
@@ -39,43 +39,47 @@ readdirp(path,settings)
                 let name = currentFile.xrdMeasurements.sample.name
                 const query = 'SELECT name, download, status FROM solicitations WHERE name = "'+name+'"'
                 connection.query(query, function (error, results, fields) {
-                    if (results.length == 0) {
-                        NotFound.push(        	
-                            //pega o caminho do arquivo
-                             name+' - '+v+ ('\n')
-                          );
-                            fs.writeFile('amostras_nao_encontradas.txt', NotFound ,function(err) {
-                                if(err) {
-                                    return console.log(err);
-                                }
-                                console.log("O arquivo foi salvo!");
-                            });
+                    if (results) {
+                        if (results.length == 0) {
+                            NotFound.push(        	
+                                //pega o caminho do arquivo
+                                name+' - '+v+ ('\n')
+                            );
+                                fs.writeFile('amostras_nao_encontradas.txt', NotFound ,function(err) {
+                                    if(err) {
+                                        return console.log(err);
+                                    }
+                                    console.log("O arquivo foi salvo!");
+                                });
+                        }else{
+                            if (results[0].status <= 5) {
+                                NullUp.push(        	
+                                    //pega o caminho do arquivo
+                                        name+' - '+v + ('\n')
+                                    );
+                                    fs.writeFile('amostras_sem_upload.txt', NullUp ,function(err) {
+                                    if(err) {
+                                        return console.log(err);
+                                    }
+                                    console.log("O arquivo foi salvo!");
+                                });
+                            }
+                            if (results[0].status == 6) {
+                                NotNullUp.push(        	
+                                    //pega o caminho do arquivo
+                                        name+' - '+v + ('\n')
+                                    );
+                                    fs.writeFile('amostras_com_upload_mas_nao_autorizadas.txt', NotNullUp ,function(err) {
+                                    if(err) {
+                                        return console.log(err);
+                                    }
+                                    console.log("O arquivo foi salvo!");
+                                });
+                            }
+                            console.log(i, results[0]);
+                        }
                     }else{
-                        if (results[0].status <= 5) {
-                            NullUp.push(        	
-                                //pega o caminho do arquivo
-                                    name+' - '+v + ('\n')
-                                );
-                                fs.writeFile('amostras_sem_upload.txt', NullUp ,function(err) {
-                                if(err) {
-                                    return console.log(err);
-                                }
-                                console.log("O arquivo foi salvo!");
-                            });
-                        }
-                        if (results[0].status == 6) {
-                            NotNullUp.push(        	
-                                //pega o caminho do arquivo
-                                    name+' - '+v + ('\n')
-                                );
-                                fs.writeFile('amostras_com_upload_mas_nao_autorizadas.txt', NotNullUp ,function(err) {
-                                if(err) {
-                                    return console.log(err);
-                                }
-                                console.log("O arquivo foi salvo!");
-                            });
-                        }
-                        console.log(i, results[0]);
+                        console.log(error)
                     }
                 });
                 console.log(name)
